@@ -1,0 +1,8 @@
+{
+  "name": "Manufacturing BI Dashboard",
+  "description": "An interactive, glassmorphic industrial intelligence dashboard for real-time manufacturing analytics, OEE tracking, and resource management.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
