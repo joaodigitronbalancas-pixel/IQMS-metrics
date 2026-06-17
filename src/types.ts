@@ -1,85 +1,99 @@
-export interface KPIMetric {
-  label: string;
-  value: string | number;
-  subValue?: string;
-  trend?: 'up' | 'down' | 'neutral';
-  color?: string;
-}
+/**
+ * Types modeling a high-end Boutique Fashion & Accessories Commercial Platform.
+ * Supports inventory, CRM, active POS triggers, and sales funnels.
+ */
 
-export interface MetricCardData {
-  title: string;
-  value: string | number;
-  change: string;
-  trend: 'up' | 'down';
-  detailedData: any;
-}
+export type ActiveTab = 'summary' | 'inventory' | 'returns' | 'delivery';
 
-export type ActiveTab = 'summary' | 'availability' | 'reject' | 'delivery';
-
-export interface PlantData {
+export interface StoreBranchData {
   id: string;
   name: string;
-  oee: number;
-  availability: number;
-  performance: number;
-  quality: number;
-  productionHours: number;
-  goodParts: number;
-  scrapRate: number;
+  monthlyMetaProgress: number; // monthly goal percentage progress (equivalent to circular outer ring)
+  conversionRate: number; // percentage of visitors who purchase
+  grossMargin: number; // percentage profit margin
+  customerSatisfaction: number; // satisfaction score (e.g. 98.4%)
+  activeSalesHours: number; // hours of open sales tracked
+  itemsSold: number; // count of items sold
+  returnRate: number; // percentage of items returned/exchanged
   topKPIs: {
-    ePlant: number;
-    mfgType: string;
-    mfgCell: string;
-    productCount: number;
-    downtimePercent: number;
-    totalDowntimeHours: number;
-    availableActualHours: number;
+    branchCode: string;
+    storeType: string; // "Premium Boutique", "Flagship", "Online Hub"
+    salesManager: string;
+    totalCustomersCount: number;
+    returnRatePercent: number;
+    totalDiscountsGiven: number;
+    averageTicketValue: number; // average R$ per transaction
   };
-  oeeByMfgType: {
-    total: number;
-    change: string;
+  salesByProductType: {
+    totalRevenue: number; // In R$ thousands
+    change: string; // e.g. "+8.5%/mês"
     trend: 'up' | 'down';
-    genericTime: number;
-    injectionTime: number;
+    apparelSales: number; // R$ in clothes
+    accessorySales: number; // R$ in accessories (jewelry, bags, sunglasses)
   };
-  oeeTrendAnnual: {
-    average: number;
+  salesTrendAnnual: {
+    averageTicket: number;
     change: string;
     trend: 'up' | 'down';
     bars: {
-      label: string;
-      value: number;
-      type: 'Injective' | 'Generic';
+      label: string; // e.g., "Outuno", "Inverno", "Verão"
+      value: number; // ticket value
+      category: 'Apparel' | 'Accessories';
     }[];
   };
-  productionDowntimeHours: {
-    average: number;
+  hourlyTrafficSales: {
+    averageTraffic: number;
     change: string;
     trend: 'up' | 'down';
     series: {
-      time: string;
-      production: number;
-      downtime: number;
+      time: string; // "10:00", "12:00", etc.
+      visitors: number; // count of store visitors
+      transactions: number; // count of finalized purchases
     }[];
   };
-  standardActualParts: {
-    coefficient: number;
+  inventoryTargetActual: {
+    complianceCoefficient: number; // percentage of stock fully aligned with seasonal demand
     change: string;
     trend: 'up' | 'down';
     bubbles: {
       x: number;
       y: number;
       size: number;
-      type: 'standard' | 'actual';
+      type: 'standard' | 'actual'; // target visual items vs actual items
+      itemName?: string;
     }[];
   };
-  scrapByMfgType: {
+  returnsByCategory: {
     percent: number;
     change: string;
     trend: 'up' | 'down';
     points: {
       month: string;
-      scrap: number;
+      rate: number;
     }[];
   };
+}
+
+export interface InventoryItem {
+  id: string;
+  name: string;
+  category: 'Roupas' | 'Acessórios' | 'Bolsas' | 'Calçados';
+  sku: string;
+  price: number;
+  stock: number;
+  minStock: number;
+  size: 'P' | 'M' | 'G' | 'GG' | 'Único';
+  color: string;
+  rating: number;
+}
+
+export interface ClientProfile {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  preferredCategory: string;
+  totalSpent: number;
+  membershipLevel: 'Estrela' | 'Gold' | 'Black' | 'Premium';
+  points: number;
 }
