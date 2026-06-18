@@ -26,6 +26,7 @@ import {
   FactoryChatsDrawer
 } from './components/UtilityDrawers';
 import PDVTerminal from './components/PDVTerminal';
+import { IaVendasView } from './components/IaVendasView';
 
 export default function App() {
   // 1. DATA STORES STATES
@@ -69,6 +70,23 @@ export default function App() {
       setIsReloading(false);
       setToastMessage("✅ Todos os estoques físicos e canais integrados foram sincronizados com sucesso!");
     }, 1200);
+  };
+
+  // IA Vendas simulation callback to sync parent state/inventories when order gets webhook approved
+  const onIaVendasCallback = () => {
+    triggerReload();
+    // Re-verify the stock of Roupas and Accessories
+    setTimeout(() => {
+      setInventory(prevInventory => 
+        prevInventory.map(item => {
+          // If Vestido is sold out we keep a robust state
+          if (item.id === 'PROD-001' && item.stock > 3) {
+            return { ...item, stock: item.stock - 1 };
+          }
+          return item;
+        })
+      );
+    }, 200);
   };
 
   // SUCCESS POS SALES CALLBACK: Wire up stock decrement, revenue addition, and CRM points!
@@ -312,12 +330,15 @@ export default function App() {
 
       {/* 3. SIDE NAVIGATION CONTROLS BAR */}
       <Sidebar
-        activeScreen="dashboard"
-        setActiveScreen={() => {}}
+        activeScreen={activeTab === 'ia_vendas' ? 'ia-vendas' : 'dashboard'}
+        setActiveScreen={(scr) => {
+          if (scr === 'dashboard') setActiveTab('summary');
+        }}
         onSearchClick={() => setShowSearchBox(true)}
         onNotificationsClick={() => setIsAlertsOpen(true)}
         onMessagesClick={() => setIsChatsOpen(true)}
         onSettingsClick={() => setIsSettingsOpen(true)}
+        onIaVendasClick={() => setActiveTab('ia_vendas')}
         unreadCount={3}
       />
 
@@ -359,6 +380,7 @@ export default function App() {
                   {activeTab === 'inventory' && 'Catálogo & Estoques RFID'}
                   {activeTab === 'returns' && 'Auditoria de Trocas & CRM'}
                   {activeTab === 'delivery' && 'Status de Rastreios & Envios'}
+                  {activeTab === 'ia_vendas' && '🧠 Operações Inteligentes Sofia IA'}
                 </h1>
                 <p className="text-xs text-zinc-400 font-sans mt-1 flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block animate-pulse" />
@@ -372,12 +394,13 @@ export default function App() {
               
               {/* Select Active Perspective Tab */}
               <div className="flex bg-black/25 p-1 rounded-2xl border border-white/5 overflow-x-auto select-none no-scrollbar">
-                {(['summary', 'inventory', 'returns', 'delivery'] as const).map((tab) => {
+                {(['summary', 'inventory', 'returns', 'delivery', 'ia_vendas'] as const).map((tab) => {
                   const labels: Record<ActiveTab, string> = {
                     summary: 'Visão Geral (BI)',
                     inventory: 'Ver Estoques RFID',
                     returns: 'Controle de Trocas',
                     delivery: 'Monitor de Fretes',
+                    ia_vendas: '🧠 IA Vendas Online',
                   };
                   return (
                     <button
@@ -515,6 +538,15 @@ export default function App() {
               {/* DELIVERY MONITOR SCREEN */}
               {activeTab === 'delivery' && (
                 <DeliveryAnalysisView />
+              )}
+
+              {/* IA VENDAS ONLINE ADVANCED AUTOMATION SCREEN */}
+              {activeTab === 'ia_vendas' && (
+                <IaVendasView 
+                  inventory={inventory}
+                  setToastMessage={setToastMessage}
+                  triggerReload={onIaVendasCallback}
+                />
               )}
             </motion.div>
           </AnimatePresence>

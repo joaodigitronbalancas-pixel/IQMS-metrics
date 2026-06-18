@@ -1,6 +1,6 @@
 {
   "name": "Boutique Omnichannel ERP & BI Dashboard",
-  "description": "An interactive, glassmorphic retail commercial intelligence dashboard and POS checkout simulator designed for prestigious boutique clothing and accessory stores.",
+  "description": "An interactive, glassmorphic retail commercial intelligence dashboard, POS checkout simulator, and autonomous AI-driven online sales automation module (IA Vendas Online).",
   "requestFramePermissions": [],
   "majorCapabilities": [
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"

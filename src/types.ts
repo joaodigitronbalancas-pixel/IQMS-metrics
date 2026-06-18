@@ -3,7 +3,7 @@
  * Supports inventory, CRM, active POS triggers, and sales funnels.
  */
 
-export type ActiveTab = 'summary' | 'inventory' | 'returns' | 'delivery';
+export type ActiveTab = 'summary' | 'inventory' | 'returns' | 'delivery' | 'ia_vendas';
 
 export interface StoreBranchData {
   id: string;

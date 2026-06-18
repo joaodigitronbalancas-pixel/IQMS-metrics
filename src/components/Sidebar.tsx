@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, Search, Bell, Mail, Bookmark, Settings, ToggleLeft } from 'lucide-react';
+import { Home, Search, Bell, Mail, Bookmark, Settings, ToggleLeft, Sparkles } from 'lucide-react';
 import { motion } from 'motion/react';
 
 interface SidebarProps {
@@ -10,6 +10,7 @@ interface SidebarProps {
   onMessagesClick: () => void;
   onSettingsClick: () => void;
   unreadCount: number;
+  onIaVendasClick?: () => void;
 }
 
 export default function Sidebar({
@@ -20,9 +21,11 @@ export default function Sidebar({
   onMessagesClick,
   onSettingsClick,
   unreadCount,
+  onIaVendasClick,
 }: SidebarProps) {
   const sidebarItems = [
     { id: 'dashboard', icon: Home, label: 'Painel Comercial', action: () => setActiveScreen('dashboard') },
+    { id: 'ia-vendas', icon: Sparkles, label: '🧠 IA Vendas Online', action: onIaVendasClick || (() => {}) },
     { id: 'search', icon: Search, label: 'Consultar Estoque & Clientes', action: onSearchClick },
     { id: 'notifications', icon: Bell, label: 'Alertas de Operações', action: onNotificationsClick, badge: unreadCount },
     { id: 'messages', icon: Mail, label: 'Conversas Multicanal (CRM)', action: onMessagesClick },
