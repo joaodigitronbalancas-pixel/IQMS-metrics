@@ -1024,7 +1024,7 @@ async function startServer() {
     // Parse and update preferences
     const wasReset = updateStateFromMessage(state, lowerMsg);
     if (wasReset) {
-      return `Sem problemas! O que você gostaria de ver agora? Me diz qual tipo de peça te interessa 😊`;
+      return `Sem problemas, meu amor! O que você gostaria de explorar agora? Me fala qual tipo de peça ou look te interessa buscar no ateliê! 😊`;
     }
 
     const currentId = state.produto_interesse || state.lastSeenProduct || "PROD-002";
@@ -1032,14 +1032,53 @@ async function startServer() {
     const sizeStr = state.tamanho || state.size || "M";
     const colorStr = state.cor || state.color || "Preto";
 
-    // Detect specialized queries to maintain WhatsApp salesperson natural tone
-
-    // 1. If customer specifically asked for price or how much is it
-    if (lowerMsg.includes("preço") || lowerMsg.includes("preco") || lowerMsg.includes("quanto") || lowerMsg.includes("valor") || lowerMsg.includes("custa")) {
-      return `O investimento para o ${prod.name} é de **R$ ${prod.price.toFixed(2)}** com frete expresso gratuito! 👇\n\n🛍️ **${prod.name}**\n📸 ${prod.images['default']}\n💰 R$ ${prod.price.toFixed(2)}\n\nQuer garantir um no seu tamanho para arrasar?`;
+    // 1. GREETINGS & AMBIENT IDENTIFICATION (Human interaction prioritized)
+    if (lowerMsg.includes("oi") || lowerMsg.includes("olá") || lowerMsg.includes("ola") || lowerMsg.includes("bom dia") || lowerMsg.includes("boa tarde") || lowerMsg.includes("boa noite") || lowerMsg.includes("tudo bem") || lowerMsg.includes("quem é") || lowerMsg.includes("quem e")) {
+      return `Oi, querida! Que alegria falar com você hoje ✨ Sou a Sofia, sua concierge particular de moda e estilo na Vogue & Gems. Me conta, como posso te ajudar a brilhar? O que você está buscando no nosso acervo hoje (vestidos de seda, blazer estruturado, calças, casacos ou acessórios)? ❤️`;
     }
 
-    // 2. Size stock check / availability (satisfying Rule 1, 2, 3, 4, 5, 6, 8)
+    // 2. LOCATION / ATELIER ORIGINS FAQ
+    if (lowerMsg.includes("loja") || lowerMsg.includes("fica onde") || lowerMsg.includes("endereço") || lowerMsg.includes("endereco") || lowerMsg.includes("de onde") || lowerMsg.includes("onde vocês") || lowerMsg.includes("onde voces")) {
+      return `Nós somos do coração de São Paulo e funcionamos de forma super prática como uma boutique ateliê online! 🌸 Justamente por isso entregamos essas peças maravilhosas, com todo o capricho, perfumadas e bem embaladas para presente, diretamente na segurança da sua casa em todo o território nacional. Qual modelo do nosso acervo você andou namorando?`;
+    }
+
+    // 3. SHIPPING / DELIVERY FAQ
+    if (lowerMsg.includes("frete") || lowerMsg.includes("entrega") || lowerMsg.includes("prazo") || lowerMsg.includes("demora") || lowerMsg.includes("enviar") || lowerMsg.includes("cep") || lowerMsg.includes("envia")) {
+      return `Olha que notícia sensacional, diva! O nosso frete expresso está com frete 100% grátis ativo para todo o Brasil inteiro esta semana! 🚚 Geralmente, a entrega leva de 2 a 5 dias úteis e você recebe o código de rastreio em tempo real no WhatsApp para acompanhar cada passo. Um mimo delicioso, né? Qual modelo você gostaria de experimentar no conforto do seu lar?`;
+    }
+
+    // 4. SIZE / FIT AND EXCHANGE FAQ
+    if (lowerMsg.includes("troca") || lowerMsg.includes("trocar") || lowerMsg.includes("não servir") || lowerMsg.includes("nao servir") || lowerMsg.includes("servir") || lowerMsg.includes("devolução") || lowerMsg.includes("devolucao") || lowerMsg.includes("tamanho errado")) {
+      return `Pode ficar super sossegada e fazer seu pedido sem medo, maravilhosa! Caso a peça não vista do jeitinho perfeito que você imaginou, a primeira troca é totalmente por nossa conta, grátis e super descomplicada. 💖 Nós cuidamos de tudo. Qual tamanho você costuma usar para eu te indicar a modelagem ideal da peça que gostou?`;
+    }
+
+    // 5. FABRIC / MATERIALS & PIECE SPECIFICS (Answers questions first!)
+    if (lowerMsg.includes("tecido") || lowerMsg.includes("material") || lowerMsg.includes("qualidade") || lowerMsg.includes("encolhe") || lowerMsg.includes("composição") || lowerMsg.includes("composicao") || lowerMsg.includes("couro") || lowerMsg.includes("seda")) {
+      let fabricDesc = "Nós só trabalhamos com tecidos nobres premium de alta costura, que não encolhem e não deformam após a lavagem. Toque incrivelmente macio no corpo!";
+      
+      if (prod.id === "PROD-001") {
+        fabricDesc = "O nosso Vestido Midi Seda Floral é confeccionado em seda acetinada nobre fluida de altíssima qualidade. O toque é fresco, ele é todo forrado internamente e não encolhe absolutamente nada. Caimento de princesa!";
+      } else if (prod.id === "PROD-002") {
+        fabricDesc = "A nossa Jaqueta Bomber Couro Ecológico é feita com couro vegano ecológico de alta densidade revestida. Ela tem toque super macio, acabamento encorpado e não descasca de jeito nenhum. É eterna!";
+      } else if (prod.id === "PROD-004") {
+        fabricDesc = "O Blazer Estruturado Premium é produzido em alfaiataria encorpada premium com forro interno completo acetinado. Possui ombreiras sutis para uma postura imponente e refinada de ateliê. Elegância pura!";
+      } else if (prod.id === "PROD-005") {
+        fabricDesc = "A nossa Calça High Waist é feita em alfaiataria estruturada de alta densidade. Ela modela o corpo, tem toque sedoso na pele e não fica transparente de jeito nenhum. Fica perfeita!";
+      } else if (prod.id.startsWith("ACC")) {
+        fabricDesc = "As nossas joias premium levam um banho reforçado e espesso em ouro 18k ou ródio prateado de dez camadas, finalizado com verniz hipoalergênico que previne qualquer tipo de escurecimento ou alergia.";
+      }
+
+      const prodImg = prod.images[state.cor || state.color || 'default'] || prod.images['default'];
+      return `${fabricDesc} ✨ Olha que primor de modelo:\n\n🛍️ **${prod.name}**\n📸 ${prodImg}\n💰 R$ ${prod.price.toFixed(2)}\n\nO que achou desse tecido e acabamento nobre, querida?`;
+    }
+
+    // 6. PRICE / COST FAQS
+    if (lowerMsg.includes("preço") || lowerMsg.includes("preco") || lowerMsg.includes("quanto") || lowerMsg.includes("valor") || lowerMsg.includes("custa") || lowerMsg.includes("valores")) {
+      const prodImg = prod.images[state.cor || state.color || 'default'] || prod.images['default'];
+      return `Olha só, gata! O investimento para o ${prod.name} é de **R$ ${prod.price.toFixed(2)}** com o nosso frete expresso 100% grátis ativo e dividimos em até 6x sem juros! 👇\n\n🛍️ **${prod.name}**\n📸 ${prodImg}\n💰 R$ ${prod.price.toFixed(2)}\n\nGostaria que eu reservasse um dele no seu tamanho no cabide?`;
+    }
+
+    // 7. STOCK & SIZE AVAILABILITY FAQ (answering sizes politely)
     const isAvailabilityQuery = (state.size || state.tamanho) && (
       lowerMsg.includes("tem") || 
       lowerMsg.includes("uso") || 
@@ -1059,14 +1098,14 @@ async function startServer() {
         state.stage = 'validating';
         const prodImg = prod.images[state.cor || state.color || 'default'] || prod.images['default'];
         
-        return `Tenho sim no ${activeSize} 👇 olha essa opção:\n\n🛍️ **${prod.name}**\n📸 ${prodImg}\n💰 R$ ${prod.price.toFixed(2)}\n📏 Tamanho ${activeSize} disponível!\n\nPrefere mais justo ou larguinho no corpo?`;
+        return `Temos sim no tamanho ${activeSize} disponível para você arrasar, querida! O caimento dele é impecável e valoriza demais o corpo 👇\n\n🛍️ **${prod.name}**\n📸 ${prodImg}\n💰 R$ ${prod.price.toFixed(2)}\n📏 Tamanho ${activeSize} disponível!\n\nVocê prefere peças com caimento mais justo ou mais fluido/soltinho?`;
       } else {
-        return `O tamanho ${activeSize} para o ${prod.name} esgotou em nosso estoque agora (temos P, M e G). Gostaria de ver outro tamanho ou prefere dar uma olhada em outro modelo?`;
+        return `Linda, nossa alta procura esgotou o tamanho ${activeSize} para o ${prod.name} hoje (ainda restam algumas últimas peças nos tamanhos P, M e G). Quer que eu te mostre alguma de nossas outras peças ou prefere dar uma olhadinha em um tamanho aproximado?`;
       }
     }
 
-    // 3. Smart colors query
-    if (lowerMsg.includes("cor") || lowerMsg.includes("cores") || lowerMsg.includes("color") || lowerMsg.includes("tons") || lowerMsg.includes("tonalidades")) {
+    // 8. COLOR COMPARISON / COLOR DISCOVERY FAQ
+    if (lowerMsg.includes("cor") || lowerMsg.includes("cores") || lowerMsg.includes("color") || lowerMsg.includes("tons") || lowerMsg.includes("tonalidade") || lowerMsg.includes("opções")) {
       state.etapa_funil = 'escolha';
       state.stage = 'validating';
       
@@ -1083,55 +1122,56 @@ async function startServer() {
         const img = prod.images[col] || prod.images['default'];
         colorsList += `${emoji} ${col}\n📸 ${img}\n\n`;
       }
-      return `Tenho essas cores maravilhosas disponíveis para o ${prod.name} 👇\n\n${colorsList}Qual delas você gostou mais?`;
+      return `Temos esses tons belíssimos e requintados disponíveis para o seu ${prod.name} 👇\n\n${colorsList}Qual dessas tonalidades é a sua favorita para combinar com as peças de seu armário?`;
     }
 
-    // 4. Overcoming objections (Discount/Cupom)
-    if (lowerMsg.includes("desconto") || lowerMsg.includes("cupom") || lowerMsg.includes("caro") || lowerMsg.includes("mimo") || lowerMsg.includes("consegue") || lowerMsg.includes("frete")) {
-      return `Compreendo perfeitamente, diva! Consigo aplicar **10% OFF especial** usando o cupom **IA-VOGUE** e mais **5% OFF extra no Pix**. Quer garantir essa cortesia?`;
+    // 9. DISCOUNT & COUPONS REQUESTS
+    if (lowerMsg.includes("desconto") || lowerMsg.includes("cupom") || lowerMsg.includes("caro") || lowerMsg.includes("mimo") || lowerMsg.includes("consegue") || lowerMsg.includes("uma cortesia")) {
+      return `Olha só, gata! Para te ajudar a arrasar com essa peça incrível no final de semana, o meu gerente liberou uma cortesia de **10% OFF** de boas-vindas com o cupom **IA-VOGUE** e aplicando mais **5% OFF extra no Pix**! O que me diz de aproveitarmos hoje?`;
     }
 
-    // 5. Checkout confirmation / Ready to buy check (strictly locks payment trigger block)
-    const isReadyToBuy = lowerMsg.includes("gostei") || 
-                         lowerMsg.includes("vou levar") || 
-                         lowerMsg.includes("levar") || 
-                         lowerMsg.includes("separar") || 
-                         lowerMsg.includes("fechar") || 
-                         lowerMsg.includes("gerar o de pagamento") || 
-                         lowerMsg.includes("pagar") || 
-                         lowerMsg.includes("fechar o pedido") || 
-                         lowerMsg.includes("quero essa") || 
-                         lowerMsg.includes("sim") || 
-                         lowerMsg.includes("quero de") ||
-                         lowerMsg.includes("gerar link") ||
-                         lowerMsg.includes("enviar link");
+    // 10. REAL INTEREST COMMITMENT (Only propose payment forms after they commit!)
+    const isReadyToBuy = lowerMsg.includes("vou levar") || 
+                         lowerMsg.includes("vou querer") || 
+                         lowerMsg.includes("quero comprar") || 
+                         lowerMsg.includes("separa um") || 
+                         lowerMsg.includes("separa") || 
+                         lowerMsg.includes("quero ficar com") || 
+                         lowerMsg.includes("ficar com") || 
+                         lowerMsg.includes("pagar o") || 
+                         lowerMsg.includes("gerar o pedido") || 
+                         lowerMsg.includes("pode fechar") || 
+                         lowerMsg.includes("me envia o link") ||
+                         lowerMsg.includes("me manda o link") ||
+                         lowerMsg.includes("quero levar") ||
+                         lowerMsg.includes("garantir") ||
+                         lowerMsg.includes("comprar");
 
     if (isReadyToBuy) {
       if (state.etapa_funil !== 'fechamento' && state.stage !== 'checkout') {
         state.etapa_funil = 'fechamento';
         state.stage = 'checkout';
         
-        // Custom cross-sell only allowed when they show active buying interest (Rule 7)
-        let crossSellStr = "";
+        let optionalCrossSell = "";
         if (prod.category === 'Roupas') {
-          crossSellStr = " Inclusive, ela combina divinamente com nosso Colar Riviera banhado em zircônias!";
+          optionalCrossSell = " inclusive, ela fica perfeita quando usada junto com o nosso Colar Riviera de Zircônias que é campeão de elogios!";
         }
-        return `Excelente gosto, querida! O ${prod.name} vai ficar fantástico em você.${crossSellStr} Podemos fechar seu pedido nas opções seguras de Pix com 5% de desconto extra ou até 6x no cartão?`;
+        return `Excelente gosto, maravilhosa! O ${prod.name} vai ficar simplesmente deslumbrante em você, tem um corte primoroso! ✨${optionalCrossSell}\n\nE sobre o fechamento, como você prefere realizar: Pix (com 5% de desconto extra especial!) ou parcelado em até 6x sem juros no seu cartão de crédito? Me diz qual prefere que eu já preparo o seu link seguro!`;
       } else {
-        // Confirmed checkout - generate the secure payment link
+        // Confirmed checkout - generate secure link only when method is explicitly confirmed or mentioned now
         const finalPrice = lowerMsg.includes("pix") ? prod.price * 0.95 : prod.price;
         const isPix = lowerMsg.includes("pix") ? "Pix com 5% OFF extra" : "Boutique Segura";
         
         state.etapa_funil = 'descoberta'; // Reset cycle
         state.stage = 'initial';
         
-        return `Maravilha! Sua sacola está pronta com frete expresso gratuito ativo! 🎉\n\nNo método **${isPix}**, o investimento para o sua peça exclusiva fica em apenas **R$ ${finalPrice.toFixed(2)}**.\n\nAbaixo está o seu link seguro de boutique para faturamento:\n\n[LINK_GERADO] ${prod.id}\n\nTudo pronto! É uma honra vestir seu brilho! 💕`;
+        return `Arrasou, diva! Sua sacola de alto luxo já está prontinha e com o frete expresso gratuito totalmente ativo! 🎉\n\nNo método **${isPix}**, o seu investimento para essa peça exclusiva fica em apenas **R$ ${finalPrice.toFixed(2)}**.\n\nAbaixo está o seu link seguro de boutique de faturamento instantâneo:\n\n[LINK_GERADO] ${prod.id}\n\nTudo pronto! É uma honra imensa vestir o seu brilho! 💕`;
       }
     }
 
-    // 6. Router based on active context and general stages
+    // 11. Router based on active context and general stages
     if (state.etapa_funil === 'descoberta') {
-      return `Olá, querida! O que você quer ver no nosso acervo (vestidos de seda, jaquetas, calças ou bolsas maravilhosas) hoje? Me fala!`;
+      return `Olá, de qual peça maravilhosa de alta costura do nosso acervo de luxo (vestidos de seda, jaquetas incríveis, blazer estruturado ou nossos colares de zircônia) você gostaria de dar uma olhadinha hoje, diva?`;
     }
 
     if (state.etapa_funil === 'mostrando_produtos') {
@@ -1139,20 +1179,20 @@ async function startServer() {
       state.etapa_funil = 'escolha';
       state.stage = 'validating';
       
-      // Specifically structured product showing templates
+      // Specifically structured product showing templates but softer and humanized
       if (currentId === "PROD-002") {
-        return `Claro! 👇 olha que perfeição essa jaqueta no tamanho ${sizeStr}:\n\n🖤 **Jaqueta Bomber Couro Ecológico**\n📸 https://images.unsplash.com/photo-1551028719-00167b16eac5?w=500&auto=format&fit=crop&q=80\n💰 R$ 459,90\n📏 Tamanho ${sizeStr} disponível!\n\nVocê prefere ela com caimento mais justo ou larguinho no corpo?`;
+        return `Claro, diva! 👇 Olha que verdadeira joia no tamanho ${sizeStr}:\n\n🖤 **Jaqueta Bomber Couro Ecológico**\n📸 https://images.unsplash.com/photo-1551028719-00167b16eac5?w=500&auto=format&fit=crop&q=80\n💰 R$ 459,90\n📏 Tamanho ${sizeStr} disponível!\n\nEla veste muito elegante! Prefere ela com caimento mais justo ou prefere mais larguinho no corpo?`;
       }
 
       if (currentId === "PROD-005") {
-        return `Claro 👇 olha essa calça alfaiataria maravilhosa no tamanho ${sizeStr}:\n\n🌸 **Calça Alfaiataria High Waist**\n📸 ${imgToUse}\n💰 R$ 289,00\n📏 Tamanho ${sizeStr} disponível!\n\nQual estilo de caimento você gosta mais para calças?`;
+        return `Claro, amada! 👇 Olha essa calça alfaiataria maravilhosa no tamanho ${sizeStr}, tem uma modelagem que desenha o corpo:\n\n🌸 **Calça Alfaiataria High Waist**\n📸 ${imgToUse}\n💰 R$ 289,00\n📏 Tamanho ${sizeStr} disponível!\n\nQual é o seu estilo favorito de caimento para calças?`;
       }
 
-      return `Claro! Olha que perfeição separei de ${prod.name} no tamanho ${sizeStr} 👇:\n\n🌸 **${prod.name}**\n📸 ${imgToUse}\n💰 R$ ${prod.price.toFixed(2)}\n📏 Tamanho ${sizeStr} disponível!\n\nQuer ver mais modelos ou essa já te agradou?`;
+      return `Tenho sim, gata! Olha que perfeição separei de ${prod.name} no tamanho ${sizeStr} 👇:\n\n🌸 **${prod.name}**\n📸 ${imgToUse}\n💰 R$ ${prod.price.toFixed(2)}\n📏 Tamanho ${sizeStr} disponível!\n\nEle é simplesmente sensacional. Deseja que eu verifique alguma outra cor ou esse modelo já roubou seu coração? ❤️`;
     }
 
     if (state.etapa_funil === 'escolha') {
-      return `Essa peça é maravilhosa e veste divinamente. Gostaria de garantir ela no cabide para você ou prefere explorar outra categoria?`;
+      return `Essa peça é maravilhosa de verdade e veste espetacularmente bem. Gostaria de garantir ela reservada no cabide para você ou prefere explorar outra de nossas categorias primeiro?`;
     }
 
     return `Olá, querida! Sou a Sofia, concierge de moda premium da Vogue & Gems. Qual peça de roupa, bolsa ou acessório gostaria de ver hoje?`;
@@ -1246,22 +1286,19 @@ async function startServer() {
           --------------------------------------------------
           🚨 REGRAS ABSOLUTAS DE COMPORTAMENTO HUMANO (OBRIGATÓRIO):
           --------------------------------------------------
-          1. ENTENDER ANTES DE RESPONDER: Analise o que o cliente pediu (produto, tamanho, cor). Se ele citou um detalhe como tamanho (ex: "uso GG" ou "uso 38"), responda DIRETAMENTE sobre isso para o produto que ele estava vendo (exemplo: Calça Alfaiataria).
-          2. RESPONDER DIRETAMENTE E COM CONTINUIDADE REAL: Nunca mude de assunto ou ofereça outro produto aleatório. Se ele disse "uso GG", confirme se tem GG do produto atual (Ex: "Tenho sim no GG! Olha 👇") e continue focada no assunto atual.
-          3. RESPOSTAS CURTAS, ÚTEIS E DIRECIONADAS: Formato ideal da resposta deve ter no máximo 2 a 3 sentenças no total:
-             - 1 frase curta explicando/direta ao assunto ("Tenho no GG sim" ou "Claro, olha esse modelo lindo")
-             - Detalhes do produto (nome, imagem Unsplash correspondente e preço correspondente, tamanho)
-             - 1 pergunta curta e fechada para guiar o cliente (Ex: "Prefere mais ajustada ou larguinha?", "Qual das cores gostou mais?", "Gostou desse modelo?")
-          4. PROIBIDO UPSELL ERRADO/PREMATURO: Só sugira combinações, acessórios recomendados ou combos SE o cliente já escolheu a peça e confirmou que gostou ou que quer levar. Antes disso, nunca empurre produtos adicionais.
-          5. MOSTRAR PRODUTO SEMPRE: Sempre que citar o produto de interesse, coloque a linha com o nome do produto, preço e o link da foto para renderização no WhatsApp.
-          6. FECHAMENTO CORRETO: Só execute a venda ou gere link seguro com "[LINK_GERADO] ID_PRODUTO" (ex: [LINK_GERADO] PROD-001) quando o cliente explicitamente disser que quer fechar, levar, comprar ou pagar.
-          7. MUDANÇA DE INTENÇÃO / REINÍCIO AUTOMÁTICO DE CONTEXTO:
-             - Se a última mensagem do cliente demonstrar interesse em OUTRO produto, OUTRA cor, ou OUTRO tamanho diferente do anterior (ex: passar de Vestido para Blusa/Jaqueta/etc.), você DEVE esquecer totalmente o produto antigo e focar 100% no novo desejo, mostrando-o diretamente na sua resposta de até 2 frases. Nunca continue debatendo o assunto ou produto anterior uma vez que o cliente mudou o assunto!
+          1. INTERAÇÃO E RESPOSTA DIRETA PRIMEIRO: Você deve SEMPRE responder diretamente e de forma super amável à pergunta ou detalhe do cliente primeiro (ex: se perguntar sobre tecido, frete, localização, trocas, etc., responda de forma charmosa e humana ANTES de apresentar o produto). Nunca seja fria, seca ou robótica! Use termos calorosos como "querida", "diva", "maravilhosa" ou "amada" para gerar rapport natural de WhatsApp.
+          2. ESPERAR O CLIENTE DECIDIR COMPRAR ANTES DE OFERECER PAGAMENTO: Você está proibida de falar sobre opções de pagamento, propor fechamentos de faturamento ou disponibilizar links salvos ("[LINK_GERADO] ID_PRODUTO") até que o cliente dê o sinal verde inequívoco de que quer comprar (ex: "vou levar", "vou querer", "separa pra mim", "quero essa", "quero fechar"). Quando ele sinalizar essa intenção clara, aí sim você propõe as formas de pagamento (Pix com 5% de desconto extra ou parcelamento em até 6x sem juros no cartão de crédito) e aguarda a resposta antes de enviar o link de faturamento!
+          3. RESPOSTAS COMPLETAMENTE HUMANIZADAS E CURTAS: O formato ideal deve ser super natural (conversacional igual áudio de WhatsApp transcrito), contendo:
+             - 1 a 2 sentenças muito amigáveis respondendo diretamente à dúvida
+             - Detalhes do produto com nome, foto Unsplash real correspondente e preço
+             - 1 pergunta consultiva acolhedora para manter o cliente confortável (ex: "Prefere com caimento mais justo ou fluído?", "Gostou desse tom de cor?", "Quer dar uma olhadinha em outras fotos?")
+          4. PROIBIDO UPSELL PREMATURO: Não empurre acessórios ou produtos adicionais de forma agressiva enquanto o cliente estiver avaliando a primeira peça.
+          5. MUDANÇA DE INTENÇÃO E CONTEXTO: Se o cliente demonstrar interesse em outro produto, cor ou tamanho, mude instantaneamente o contexto de forma suave, abandonando as peças antigas e focando 100% no novo pedido.
 
           Histórico recente do cliente (${cliente}):
           Mensagem do cliente: "${mensagem}"
 
-          Escreva a resposta de Sofia exatamente no formato solicitado (curta, humana, direta, com foto correspondente se relevante, terminando sempre com uma pergunta curta focada e guiando o cliente):
+          Escreva a resposta de Sofia exatamente no formato solicitado (atenta, extremamente humana, acolhedora, respondendo às dúvidas primeiro, mostrando fotos reais correspondentes e terminando sempre com uma pergunta delicada de estilo):
         `;
 
         try {
@@ -1270,7 +1307,7 @@ async function startServer() {
             contents: promptText,
             config: {
               temperature: 0.82,
-              systemInstruction: "Você é Sofia, IA de vendas com comportamento 100% focado em responder de forma curta, natural e humana, respeitando rigorosamente o produto atual, tamanho ou detalhe solicitado pelo cliente sem desviar de assunto."
+              systemInstruction: "Você é Sofia, IA de vendas com comportamento extremamente humanizado, caloroso e atencioso. Responda diretamente e de forma completa a qualquer dúvida do cliente antes de focar em vendas. Nunca proponha formas de faturamento ou checkout de forma agressiva ou apressada antes do cliente afirmar claramente que vai levar o produto."
             }
           });
 
